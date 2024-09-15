@@ -1,0 +1,105 @@
+@echo off
+
+rem Following set by configure script
+
+rem Do I need quotes?
+
+
+
+set PROJECT_TOP_DIR={{ PROJECT_TOP_DIR }}
+set PROJECT_WORK_DIR={{ PROJECT_WORK_DIR }}
+set PROJECT_BUILD_DIR={{ PROJECT_BUILD_DIR }}
+
+set PROJECT_INSTALL_PREFIX={{ PROJECT_INSTALL_PREFIX }}
+set PROJECT_BUILD_CONFIG={{ PROJECT_BUILD_CONFIG }}
+
+
+
+set CMAKE_FLAGS="-DCMAKE_VERBOSE_MAKEFILE=TRUE"
+
+set do_help=0
+set do_clean=0
+set do_gen=0
+set do_build=0
+set do_install=0
+set do_test=0
+set do_all=0
+
+:TARGET_LOOP
+set cmd=%1
+echo %cmd%
+shift
+
+if "%cmd%" == "" (
+goto ENDLOOP
+)
+
+echo got here
+
+if "%cmd%" == "help"  (echo got here 2 )
+
+if "%cmd%" == "help"  (set do_help=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "clean" (set do_clean=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "gen"   (set do_gen=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "build" (set do_build=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "install" (set do_install=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "test" (set do_test=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "all"   (set do_all=1 
+ goto TARGET_LOOP)
+
+ goto FAIL_COMMAND
+)
+
+:ENDLOOP
+
+if %do_all% == 1 (
+  set do_clean=1
+  set do_gen=1
+  set do_build=1
+)
+
+if %do_help% == 1 (
+ echo "Help"
+ echo "valid targets are help clean gen build test install"
+ echo %PROJECT_TOP_DIR%
+ echo %PROJECT_WORK_DIR%
+ echo %PROJECT_BUILD_DIR%
+ echo %PROJECT_INSTALL_PREFIX%
+ echo %PROJECT_BUILD_CONFIG%
+)
+
+if %do_clean% == 1 (
+ echo "Clean"
+ rmdir /S /Q %PROJECT_BUILD_DIR%
+ rmdir /S /Q install.dir
+)
+
+if %do_gen% == 1 (
+ echo "Gen"
+ cmake -DCMAKE_PREFIX_PATH=%PROJECT_INSTALL_PREFIX%  -B %PROJECT_BUILD_DIR%  -S %PROJECT_TOP_DIR%\src
+)
+
+if %do_build% == 1 (
+ echo "Build"
+ cmake  --build %PROJECT_BUILD_DIR% --config=%PROJECT_BUILD_CONFIG%
+)
+
+if %do_install% == 1 (
+ echo "Install"
+ cmake  --install %PROJECT_BUILD_DIR% --prefix=%PROJECT_INSTALL_PREFIX% --config=%PROJECT_BUILD_CONFIG%
+)
+
+
+echo "Done"
+goto OK_EXIT
+
+:FAIL_COMMAND
+echo "Failed"
+
+:OK_EXIT

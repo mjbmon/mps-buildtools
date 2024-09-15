@@ -1,0 +1,100 @@
+{#  This is the template file for generating Makefile #}
+{{ HEAD_COMMENT }}
+{# Following variables are set by configure script #}
+
+PYTHON:="{{ PYTHON }}"
+MPS_BUILDTOOLS:="{{ MPS_BUILDTOOLS }}"
+
+PROJECT_TOP_DIR:="{{ PROJECT_TOP_DIR }}"
+PROJECT_BUILD_DIR:="{{ PROJECT_BUILD_DIR }}"
+PROJECT_WORK_DIR:="{{ PROJECT_WORK_DIR }}"
+PROJECT_BUILD_CONFIG:="{{ PROJECT_BUILD_CONFIG }}"
+PROJECT_INSTALL_PREFIX:="{{ PROJECT_INSTALL_PREFIX }}"
+
+{# Following variables are extracted from (top)/src/CMakeLists.txt #}
+THE_PROJECT_NAME:="{{ THE_PROJECT_NAME }}"
+THE_PROJECT_MAJOR:="{{ THE_PROJECT_MAJOR }}"
+THE_PROJECT_MINOR:="{{ THE_PROJECT_MINOR }}"
+APP:="{{ THE_PROJECT_APP }}"
+
+BUNDLE_DIR=${PROJECT_INSTALL_PREFIX}/lib/${APP}.bundle
+BIN_DIR=${PROJECT_INSTALL_PREFIX}/bin
+PYTHON = python
+
+CMAKE_FLAGS=-DCMAKE_VERBOSE_MAKEFILE=TRUE
+
+DOX_DIR = ./dox
+TARBALL_NAME = ${THE_PROJECT_NAME}.${THE_PROJECT_MAJOR}.${THE_PROJECT_MINOR}
+
+.PHONY: help clean scrub gen build install install-raw install-bundle all docs build 
+
+help:
+	@echo "Help"
+	@echo "PROJECT TOP DIR:        ${PROJECT_TOP_DIR}"
+	@echo "PROJECT WORK DIR:       ${PROJECT_WORK_DIR}"
+	@echo "PROJECT BUILD DIR:      ${PROJECT_BUILD_DIR}"
+	@echo "PROJECT INSTALL PREFIX: ${PROJECT_INSTALL_PREFIX}"
+	@echo "PROJECT BUILD CONFIG:   ${PROJECT_BUILD_CONFIG}"
+	@${PYTHON} ${MPS_BUILDTOOLS}/get_version.py --all ${PROJECT_TOP_DIR}/src/CMakeLists.txt
+	@echo "Targets are help all clean gen build test"
+	@echo " all => clean gen build"
+
+all: clean gen build
+
+clean:
+	rm -rf ${PROJECT_BUILD_DIR} ./install ./dox
+
+gen:
+	cmake ${CMAKE_FLAGS}  -B ${PROJECT_BUILD_DIR} -S ${PROJECT_TOP_DIR}/src
+
+build:
+	cmake --build ${PROJECT_BUILD_DIR} --config=${PROJECT_BUILD_CONFIG}
+
+test:
+	(cd ${PROJECT_BUILD_DIR} ; ./${APP} )
+
+scrub: clean
+	rm -rf Makefile make.conf project.dict *.tar.gz
+
+# List everything
+list: list-src list-scripts
+
+# List the C++ source code
+list-src:
+	@(cc=`find src -name "*.cc"` ; h=`find src -name "*.h"` ; echo $$cc $$h ;)
+
+# List the script files
+list-scripts:
+	@(s1=`find templates -name "*.in"`  \
+        t=`find src -name "*.txt"` ; echo $$s1 $$t configure configure.bat ;)
+
+# Run astyle on the C++ source code
+format:
+	@(cc=`find src -name "*.cc"` ; h=`find src -name "*.h"` ; \
+           for f in $$cc $$h; do echo $$f; astyle --indent=spaces=2 --style=gnu $$f ; done;)
+
+# Run clang-tidy on the C++ source code
+tidy:
+	(cc=`find src -name "*.cc"` ; h=`find src -name "*.h"` ; \
+         clang-tidy $$cc "-checks=google*" \
+           "-header-filter=.*"  -- -std=c++17 -Isrc  )
+
+# This checks if work=build and fails if so.
+check-work:
+	@(if [ ${PROJECT_WORK_DIR} = ${PROJECT_TOP_DIR} ] ; \
+         then  echo "WORK and BUILD are the same, configure in a separate work directory" ; exit 1; fi;)
+
+# Build doxygen documentation
+docs:
+	(if [ ! -d ${DOX_DIR} ] ; then mkdir ${DOX_DIR} ; fi)
+	doxygen ${PROJECT_TOP_DIR}/src/doxy/doxygen.conf
+
+# This builds a tarball using the version string for the project.
+tarball:
+	MPS_BUILDTOOLS=${MPS_BUILDTOOLS} ${MPS_BUILDTOOLS}/build-tarball.sh ${PROJECT_TOP_DIR} ${TARBALL_NAME}
+
+install: install-raw
+
+install-raw:
+	cmake --install ${PROJECT_BUILD_DIR} --prefix="${PROJECT_INSTALL_PREFIX}"
+

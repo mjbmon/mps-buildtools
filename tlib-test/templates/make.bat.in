@@ -1,0 +1,147 @@
+@echo off
+
+rem Following set by configure script
+
+rem Do I need quotes?
+
+set APP=thello
+
+set PROJECT_SOURCE_DIR={{ PROJECT_SOURCE_DIR }}
+set PROJECT_WORK_DIR={{ PROJECT_WORK_DIR }}
+set PROJECT_BUILD_DIR={{ PROJECT_BUILD_DIR }}
+
+set PROJECT_INSTALL_PREFIX={{ PROJECT_INSTALL_PREFIX }}
+set PROJECT_BUILD_CONFIG={{ PROJECT_BUILD_CONFIG }}
+
+set BUNDLE_DIR=%PROJECT_INSTALL_PREFIX%\lib\%APP%.bundle
+
+set CMAKE_FLAGS="-DCMAKE_VERBOSE_MAKEFILE=TRUE"
+
+set do_help=0
+set do_clean=0
+set do_gen=0
+set do_build=0
+set do_install_raw=0
+set do_install_bundle=0
+set do_install=0
+set do_test=0
+set do_all=0
+set do_bundle=0
+
+:TARGET_LOOP
+set cmd=%1
+echo %cmd%
+shift
+
+if "%cmd%" == "" (
+goto ENDLOOP
+)
+
+echo got here
+
+if "%cmd%" == "help"  (echo got here 2 )
+
+if "%cmd%" == "help"  (set do_help=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "clean" (set do_clean=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "gen"   (set do_gen=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "build" (set do_build=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "install-raw" (set do_install_raw=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "install-bundle" (set do_install_bundle=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "install" (set do_install=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "test" (set do_test=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "all"   (set do_all=1 
+ goto TARGET_LOOP)
+if "%cmd%" == "bundle"   (set do_bundle=1 
+ goto TARGET_LOOP)
+
+ goto FAIL_COMMAND
+)
+
+:ENDLOOP
+
+if %do_install% == 1 (
+  set do_install_bundle=1
+)
+
+if %do_all% == 1 (
+  set do_clean=1
+  set do_gen=1
+  set do_build=1
+)
+
+if %do_help% == 1 (
+ echo "Help"
+ echo "valid targets are help clean gen build test install"
+ echo %PROJECT_TOP_DIR%
+ echo %PROJECT_WORK_DIR%
+ echo %PROJECT_BUILD_DIR%
+ echo %PROJECT_INSTALL_PREFIX%
+ echo %PROJECT_BUILD_CONFIG%
+)
+
+if %do_clean% == 1 (
+ echo "Clean"
+ rmdir /S /Q %PROJECT_BUILD_DIR%
+ rmdir /S /Q install.dir
+)
+
+if %do_gen% == 1 (
+ echo "Gen"
+ cmake -DCMAKE_PREFIX_PATH=%PROJECT_INSTALL_PREFIX%  -B %PROJECT_BUILD_DIR%  -S %PROJECT_TOP_DIR%\src
+)
+
+if %do_build% == 1 (
+ echo "Build"
+ cmake  --build %PROJECT_BUILD_DIR% --config=%PROJECT_BUILD_CONFIG%
+)
+
+if %do_test% == 1 (
+ echo "Test"
+ set RUN_DIR=%PROJECT_BUILD_DIR%\%PROJECT_BUILD_CONFIG%
+
+ mkdir %RUN_DIR%\assets
+ xcopy /e /i %PROJECT_TOP_DIR%\assets %RUN_DIR%\assets
+ copy project.dict  %RUN_DIR%\assets
+
+rem a better script would retain the cwd and args
+ pushd %PROJECT_BUILD_DIR%\%PROJECT_BUILD_CONFIG%
+ dir /s
+ set BUNDLE_DIR=.
+ thello.exe
+ popd
+)
+
+if %do_install% == 1 (
+ echo "Install"
+)
+
+if %do_install_raw% == 1 (
+ echo "Install raw"
+ cmake  --install %PROJECT_BUILD_DIR% --prefix=%PROJECT_INSTALL_PREFIX% --config=%PROJECT_BUILD_CONFIG%
+)
+
+if %do_install_bundle% == 1 (
+ echo "Bundle"
+ mkdir %BUNDLE_DIR%
+ cmake  --install %PROJECT_BUILD_DIR% --prefix=%BUNDLE_DIR% --config=%PROJECT_BUILD_CONFIG%
+ mkdir %BUNDLE_DIR%\assets
+ xcopy /e /i %PROJECT_TOP_DIR%\assets %BUNDLE_DIR%\assets
+ copy project.dict  %BUNDLE_DIR%\assets
+ %PYTHON% %PROJECT_TOP_DIR%\tools\config_tool.py -DBUNDLE_DIR=%BUNDLE_DIR% app.bat.in %PROJECT_INSTALL_PREFIX%\bin\%APP%.bat
+)
+
+echo "Done"
+goto OK_EXIT
+
+:FAIL_COMMAND
+echo "Failed"
+
+:OK_EXIT

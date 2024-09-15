@@ -1,0 +1,11 @@
+build
+build.dir
+install
+install.dir
+.DS_Store
+Makefile
+make.conf
+make.bat
+project.dict
+*.orig
+dox

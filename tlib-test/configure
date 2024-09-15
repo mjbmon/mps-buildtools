@@ -1,0 +1,52 @@
+#!/bin/bash
+
+BUILD_ARCH=`uname -m`
+BUILD_OS=`uname -s`
+
+TARGET_ARCH=${BUILD_ARCH}
+TARGET_OS=${BUILD_OS}
+
+echo "Getting PROJECT_TOP_DIR..."
+PROJECT_TOP_DIR=$(dirname "$0")
+echo "PROJECT_TOP_DIR is ${PROJECT_TOP_DIR}"
+
+echo "Checking python..."
+PYTHON="${PYTHON:-python}"
+PYTHON_VERSION="`${PYTHON} --version`"
+if [ $? != 0 ]
+then
+  echo "PYTHON ${PYTHON} failed or is not python version 3+"
+  echo "You could try exporting env variable PYTHON to another version"
+  echo "perhaps python3"
+  exit 1
+fi
+echo "PYTHON version ${PYTHON_VERSION}"
+
+echo "Getting MPS_BUILDTOOLS"
+if [ -d ./mps-buildtools ]
+ then
+  MPS_BUILDTOOLS=./mps-buildtools
+elif [ -d ../mps-buildtools ]
+ then
+  MPS_BUILDTOOLS=../mps-buildtools
+elif [ "${MPS_BUILDTOOLS}" != "" ]
+ then
+  echo "MPS_BUILDTOOLS defined in environment"
+fi
+MPS_BUILDTOOLS=`readlink -f ${MPS_BUILDTOOLS}`
+echo "MPS_BUILDTOOLS ${MPS_BUILDTOOLS}"
+
+export PYTHON
+export PYTHON_VERSION
+export PROJECT_TOP_DIR
+export MPS_BUILDTOOLS
+
+export BUILD_ARCH
+export TARGET_ARCH
+export BUILD_OS
+export TARGET_OS
+
+echo "Running configure.py script..."
+${PYTHON}  ${MPS_BUILDTOOLS}/configure.py "$@"
+
+echo "Configure done."
