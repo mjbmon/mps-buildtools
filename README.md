@@ -7,11 +7,11 @@ projects on multiple platforms. The mps-buildtools scripts
 allow a developer to set up a CMake project that has the
 following instructions for the end user:
 
- unpack the tarball
- cd to the project directory created by unpacking the tarball
- ./configure
- make all
- make install
+- unpack the tarball
+- cd to the project directory created by unpacking the tarball
+- ./configure
+- make all
+- make install
 
 A main feature of mps-buildtools is to allow these instructions
 to work on Windows and MacOS as well as Linux or other Unix
