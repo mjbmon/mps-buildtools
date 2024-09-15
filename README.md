@@ -17,9 +17,12 @@ A main feature of mps-buildtools is to allow these instructions
 to work on Windows and MacOS as well as Linux or other Unix
 platforms.
 
+
+
 # thello
 
- This is a simple "Hello, world" C++ project.
+ This is a simple "Hello, world" C++ project that uses mps-buildtools
+ in conjunction with CMake.
 
 # tlib
 
