@@ -146,7 +146,7 @@ if %do_install_bundle% == 1 (
  )
  xcopy /e /i %PROJECT_TOP_DIR%\assets %INSTALL_BUNDLE_DIR%\assets
  copy project.dict  %INSTALL_BUNDLE_DIR%\assets
- %PYTHON% %MPS_BUILDTOOLS%\config_tool.py -DBUNDLE_DIR=%INSTALL_BUNDLE_DIR% app.bat.in %PROJECT_INSTAL_PREFIX%\bin\%APP%.bat
+ %PYTHON% %MPS_BUILDTOOLS%\config_tool.py -DBUNDLE_DIR=%INSTALL_BUNDLE_DIR% app.bat.in %PROJECT_INSTALL_PREFIX%\bin\%APP%.bat
 )
 
 echo "Done"
