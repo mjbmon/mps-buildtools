@@ -134,16 +134,19 @@ if %do_install_raw% == 1 (
 if %do_install_bundle% == 1 (
  echo "Bundle"
  set INSTALL_BUNDLE_DIR=%PROJECT_INSTALL_PREFIX%\lib\%APP%.bundle
+ echo "install bundle dir %INSTALL_BUNDLE_DIR%"
  if NOT exist %INSTALL_BUNDLE_DIR% (
+   echo "INSTALL BUNDLE DIR  %INSTALL_BUNDLE_DIR% does not exist"
    mkdir %INSTALL_BUNDLE_DIR%
  )
+
  cmake  --install %PROJECT_BUILD_DIR% --prefix=%INSTALL_BUNDLE_DIR% --config=%PROJECT_BUILD_CONFIG%
  if NOT exist %INSTALL_BUNDLE_DIR%\assets (
    mkdir %INSTALL_BUNDLE_DIR%\assets
  )
  xcopy /e /i %PROJECT_TOP_DIR%\assets %INSTALL_BUNDLE_DIR%\assets
  copy project.dict  %INSTALL_BUNDLE_DIR%\assets
- %PYTHON% %MPS_BUILDTOOLS%\config_tool.py -DBUNDLE_DIR=%INSTALL_BUNDLE_DIR% app.bat.in %PROJECT_INSTALL_PREFIX%\bin\%APP%.bat
+ %PYTHON% %MPS_BUILDTOOLS%\config_tool.py -DBUNDLE_DIR=%INSTALL_BUNDLE_DIR% app.bat.in %PROJECT_INSTAL_PREFIX%\bin\%APP%.bat
 )
 
 echo "Done"
