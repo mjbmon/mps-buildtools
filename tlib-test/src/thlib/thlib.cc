@@ -58,6 +58,10 @@ static void setup_bundle_paths()
     }
   strncpy(bundle_path, bundle_dir, MAX_PATH_LENGTH);  // NOLINT
 
+#ifdef _WIN32
+  snprintf(asset_path, MAX_PATH_LENGTH, "%s\\assets", bundle_path);
+#else
   snprintf(asset_path, MAX_PATH_LENGTH, "%s/assets", bundle_path);
+#endif
 
 }
