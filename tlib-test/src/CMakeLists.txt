@@ -17,6 +17,8 @@ set(TMISC_LIB tmisc)
 
 find_package(${TMISC_PACKAGE} REQUIRED)
 
+message("mps-tlib_LIB_DIR ${mps-tlib_LIB_DIR}")
+
 set(APP ${THE_PROJECT_APP})
 
 add_executable(${APP})
