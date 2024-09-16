@@ -1,4 +1,5 @@
 @echo off
+setlocal EnableDelayedExpansion
 
 echo "Windows configure script"
 
@@ -13,25 +14,30 @@ set P="%PYTHON% --version"
 FOR /F "delims=" %%i IN ('%P%') DO set PYTHON_VERSION=%%i
 echo "PYTHON VERSION is %PYTHON_VERSION%"
 
-echo "Getting MPS_BUILDTOOLS"
-if exist .\mps-buildtools (
-  echo set MPS_BUILDTOOLS=.\mps-buildtools
-  set MPS_BUILDTOOLS=.\mps-buildtools
-) else (
-    if exist ..\mps-buildtools (
-       echo set  MPS_BUILDTOOLS=..\mps-buildtools
-       set  MPS_BUILDTOOLS=..\mps-buildtools
-        ) else (
-             if "%MPS_BUILDTOOLS%"=="" (
-                echo "Cannot find mps-buildtools"
-                exit /B
-           )
-     )
+echo "Getting MPS_BUILDTOOLS..."
+set blist=%PROJECT_TOP_DIR% %PROJECT_TOP_DIR%\.. %HOMEDRIVE%%HOMEPATH%\.local\lib
+echo "got here"
+echo "blist %blist%"
+for %%b in (%blist%) do (
+  set bt=%%b%\mps-buildtools
+  echo "Look for !bt!"
+  if exist !bt! (
+    if exist !bt!\configure.py (
+      echo "Found !bt!"
+      goto :found_buildtools
+    )
+  )
+
 )
 
-echo "MPS_BUILDTOOLS %MPS_BUILDTOOLS%"
+echo "Cannot find mps-buildtools"
+exit /B
 
-echo "Running configure.py ..."
-%PYTHON%  %MPS_BUILDTOOLS%\configure.py %*
+:found_buildtools
+echo "Found !bt!"
+set MPS_BUILDTOOLS=!bt!
+
+echo "Running configure.py..."
+%PYTHON%  !MPS_BUILDTOOLS!\configure.py %*
 
 echo "Configure done."

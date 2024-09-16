@@ -22,19 +22,21 @@ then
 fi
 echo "PYTHON version ${PYTHON_VERSION}"
 
-echo "Getting MPS_BUILDTOOLS"
-if [ -d ./mps-buildtools ]
- then
-  MPS_BUILDTOOLS=./mps-buildtools
-elif [ -d ../mps-buildtools ]
- then
-  MPS_BUILDTOOLS=../mps-buildtools
-elif [ "${MPS_BUILDTOOLS}" != "" ]
- then
-  echo "MPS_BUILDTOOLS defined in environment"
+echo "Getting MPS_BUILDTOOLS..."
+blist="${MPS_BUILDTOOLS}  ${PROJECT_TOP_DIR} ${PROJECT_TOP_DIR}/.. ${HOME}/.local/lib"
+bt=""
+for b in $blist 
+do
+  echo "Look in $b for mps-buildtools"
+  bt=$b/mps-buildtools
+  [ -d $bt ] && [ -e $bt/configure.py ] && echo "Found $bt" && break
+done
+if [ "$bt" == "" ]
+then
+ echo "mps-buildtools not found"
+ exit 1
 fi
-MPS_BUILDTOOLS=`readlink -f ${MPS_BUILDTOOLS}`
-echo "MPS_BUILDTOOLS ${MPS_BUILDTOOLS}"
+MPS_BUILDTOOLS=$bt
 
 export PYTHON
 export PYTHON_VERSION
