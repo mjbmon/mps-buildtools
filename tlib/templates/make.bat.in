@@ -1,4 +1,5 @@
 @echo off
+setlocal EnableDelayedExpansion
 
 rem Following set by configure script
 
@@ -71,32 +72,32 @@ if %do_all% == 1 (
 if %do_help% == 1 (
  echo "Help"
  echo "valid targets are help clean gen build test install"
- echo %PROJECT_TOP_DIR%
- echo %PROJECT_WORK_DIR%
- echo %PROJECT_BUILD_DIR%
- echo %PROJECT_INSTALL_PREFIX%
- echo %PROJECT_BUILD_CONFIG%
+ echo !PROJECT_TOP_DIR!
+ echo !PROJECT_WORK_DIR!
+ echo !PROJECT_BUILD_DIR!
+ echo !PROJECT_INSTALL_PREFIX!
+ echo !PROJECT_BUILD_CONFIG!
 )
 
 if %do_clean% == 1 (
  echo "Clean"
- rmdir /S /Q %PROJECT_BUILD_DIR%
+ rmdir /S /Q !PROJECT_BUILD_DIR!
  rmdir /S /Q install.dir
 )
 
 if %do_gen% == 1 (
  echo "Gen"
- cmake -DCMAKE_PREFIX_PATH=%PROJECT_INSTALL_PREFIX%  -B %PROJECT_BUILD_DIR%  -S %PROJECT_TOP_DIR%\src
+ cmake -DCMAKE_PREFIX_PATH=!PROJECT_INSTALL_PREFIX!  -B !PROJECT_BUILD_DIR!  -S !PROJECT_TOP_DIR!\src
 )
 
 if %do_build% == 1 (
  echo "Build"
- cmake  --build %PROJECT_BUILD_DIR% --config=%PROJECT_BUILD_CONFIG%
+ cmake  --build !PROJECT_BUILD_DIR! --config=!PROJECT_BUILD_CONFIG!
 )
 
 if %do_install% == 1 (
  echo "Install"
- cmake  --install %PROJECT_BUILD_DIR% --prefix=%PROJECT_INSTALL_PREFIX% --config=%PROJECT_BUILD_CONFIG%
+ cmake  --install !PROJECT_BUILD_DIR! --prefix=!PROJECT_INSTALL_PREFIX! --config=!PROJECT_BUILD_CONFIG!
 )
 
 

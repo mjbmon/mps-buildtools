@@ -1,5 +1,7 @@
 @echo off
+setlocal EnableDelayedExpansion
+
 set BUNDLE_DIR={{ BUNDLE_DIR }}
-echo BUNDLE DIR is %BUNDLE_DIR%
+echo BUNDLE DIR is !BUNDLE_DIR!
 set APP={{ THE_PROJECT_APP }}
-%BUNDLE_DIR%\bin\%APP%.exe %*
+!BUNDLE_DIR!\bin\!APP!.exe %*

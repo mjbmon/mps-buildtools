@@ -1,4 +1,5 @@
 @echo off
+setlocal EnableDelayedExpansion
 
 rem Following set by configure script
 
@@ -85,39 +86,39 @@ if %do_all% == 1 (
 if %do_help% == 1 (
  echo "Help"
  echo "valid targets are help clean gen build test install"
- echo %PROJECT_TOP_DIR%
- echo %PROJECT_WORK_DIR%
- echo %PROJECT_BUILD_DIR%
- echo %PROJECT_INSTALL_PREFIX%
- echo %PROJECT_BUILD_CONFIG%
+ echo !PROJECT_TOP_DIR!
+ echo !PROJECT_WORK_DIR!
+ echo !PROJECT_BUILD_DIR!
+ echo !PROJECT_INSTALL_PREFIX!
+ echo !PROJECT_BUILD_CONFIG!
 )
 
 if %do_clean% == 1 (
  echo "Clean"
- rmdir /S /Q %PROJECT_BUILD_DIR%
+ rmdir /S /Q !PROJECT_BUILD_DIR!
  rmdir /S /Q install.dir
 )
 
 if %do_gen% == 1 (
  echo "Gen"
- cmake -DCMAKE_PREFIX_PATH=%PROJECT_INSTALL_PREFIX%  -B %PROJECT_BUILD_DIR%  -S %PROJECT_TOP_DIR%\src
+ cmake -DCMAKE_PREFIX_PATH=!PROJECT_INSTALL_PREFIX!  -B !PROJECT_BUILD_DIR!  -S !PROJECT_TOP_DIR!\src
 )
 
 if %do_build% == 1 (
  echo "Build"
- cmake  --build %PROJECT_BUILD_DIR% --config=%PROJECT_BUILD_CONFIG%
+ cmake  --build !PROJECT_BUILD_DIR! --config=!PROJECT_BUILD_CONFIG!
 )
 
 if %do_test% == 1 (
  echo "Test"
- set RUN_DIR=%PROJECT_BUILD_DIR%\%PROJECT_BUILD_CONFIG%
+ set RUN_DIR=!PROJECT_BUILD_DIR!\!PROJECT_BUILD_CONFIG!
 
- mkdir %RUN_DIR%\assets
- xcopy /e /i %PROJECT_TOP_DIR%\assets %RUN_DIR%\assets
- copy project.dict  %RUN_DIR%\assets
+ mkdir !RUN_DIR!\assets
+ xcopy /e /i !PROJECT_TOP_DIR!\assets !RUN_DIR!\assets
+ copy project.dict  !RUN_DIR!\assets
 
 rem a better script would retain the cwd and args
- pushd %PROJECT_BUILD_DIR%\%PROJECT_BUILD_CONFIG%
+ pushd !PROJECT_BUILD_DIR!\!PROJECT_BUILD_CONFIG!
  dir /s
  set BUNDLE_DIR=.
  thello.exe
@@ -130,25 +131,25 @@ if %do_install% == 1 (
 
 if %do_install_raw% == 1 (
  echo "Install raw"
- cmake  --install %PROJECT_BUILD_DIR% --prefix=%PROJECT_INSTALL_PREFIX% --config=%PROJECT_BUILD_CONFIG%
+ cmake  --install !PROJECT_BUILD_DIR! --prefix=!PROJECT_INSTALL_PREFIX! --config=!PROJECT_BUILD_CONFIG!
 )
 
 if %do_install_bundle% == 1 (
  echo "Bundle"
- set INSTALL_BUNDLE_DIR=%PROJECT_INSTALL_PREFIX%\lib\%APP%.bundle
- echo "install bundle dir %INSTALL_BUNDLE_DIR%"
- if NOT exist %INSTALL_BUNDLE_DIR% (
-   echo "INSTALL BUNDLE DIR  %INSTALL_BUNDLE_DIR% does not exist"
-   mkdir %INSTALL_BUNDLE_DIR%
+ set INSTALL_BUNDLE_DIR=!PROJECT_INSTALL_PREFIX!\lib\!APP!.bundle
+ echo "install bundle dir !INSTALL_BUNDLE_DIR!"
+ if NOT exist !INSTALL_BUNDLE_DIR! (
+   echo "INSTALL BUNDLE DIR  !INSTALL_BUNDLE_DIR! does not exist"
+   mkdir !INSTALL_BUNDLE_DIR!
  )
 
- cmake  --install %PROJECT_BUILD_DIR% --prefix=%INSTALL_BUNDLE_DIR% --config=%PROJECT_BUILD_CONFIG%
- if NOT exist %INSTALL_BUNDLE_DIR%\assets (
-   mkdir %INSTALL_BUNDLE_DIR%\assets
+ cmake  --install !PROJECT_BUILD_DIR! --prefix=!INSTALL_BUNDLE_DIR! --config=!PROJECT_BUILD_CONFIG!
+ if NOT exist !INSTALL_BUNDLE_DIR!\assets (
+   mkdir !INSTALL_BUNDLE_DIR!\assets
  )
- xcopy /e /i %PROJECT_TOP_DIR%\assets %INSTALL_BUNDLE_DIR%\assets
- copy project.dict  %INSTALL_BUNDLE_DIR%\assets
- %PYTHON% %MPS_BUILDTOOLS%\config_tool.py -DBUNDLE_DIR=%INSTALL_BUNDLE_DIR% app.bat.in %PROJECT_INSTALL_PREFIX%\bin\%APP%.bat
+ xcopy /e /i !PROJECT_TOP_DIR!\assets !INSTALL_BUNDLE_DIR!\assets
+ copy project.dict  !INSTALL_BUNDLE_DIR!\assets
+ !PYTHON! !MPS_BUILDTOOLS!\config_tool.py -DBUNDLE_DIR=!INSTALL_BUNDLE_DIR! app.bat.in !PROJECT_INSTALL_PREFIX!\bin\!APP!.bat
 )
 
 echo "Done"
