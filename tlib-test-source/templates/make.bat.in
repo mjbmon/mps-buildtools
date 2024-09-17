@@ -4,18 +4,23 @@ rem Following set by configure script
 
 rem Do I need quotes?
 
-set APP=thello
-
-set PROJECT_SOURCE_DIR={{ PROJECT_SOURCE_DIR }}
-set PROJECT_WORK_DIR={{ PROJECT_WORK_DIR }}
+set PYTHON={{ PYTHON }}
+set MPS_BUILDTOOLS={{ MPS_BUILDTOOLS }}
+set PROJECT_TOP_DIR={{ PROJECT_TOP_DIR }}
 set PROJECT_BUILD_DIR={{ PROJECT_BUILD_DIR }}
-
-set PROJECT_INSTALL_PREFIX={{ PROJECT_INSTALL_PREFIX }}
+set PROJECT_WORK_DIR={{ PROJECT_WORK_DIR }}
 set PROJECT_BUILD_CONFIG={{ PROJECT_BUILD_CONFIG }}
+set PROJECT_INSTALL_PREFIX={{ PROJECT_INSTALL_PREFIX }}
 
-set BUNDLE_DIR=%PROJECT_INSTALL_PREFIX%\lib\%APP%.bundle
+set THE_PROJECT_NAME="{{ THE_PROJECT_NAME }}"
+set THE_PROJECT_MAJOR="{{ THE_PROJECT_MAJOR }}"
+set THE_PROJECT_MINOR="{{ THE_PROJECT_MINOR }}"
+set APP={{ THE_PROJECT_APP }}
+
 
 set CMAKE_FLAGS="-DCMAKE_VERBOSE_MAKEFILE=TRUE"
+
+
 
 set do_help=0
 set do_clean=0
@@ -130,12 +135,20 @@ if %do_install_raw% == 1 (
 
 if %do_install_bundle% == 1 (
  echo "Bundle"
- mkdir %BUNDLE_DIR%
- cmake  --install %PROJECT_BUILD_DIR% --prefix=%BUNDLE_DIR% --config=%PROJECT_BUILD_CONFIG%
- mkdir %BUNDLE_DIR%\assets
- xcopy /e /i %PROJECT_TOP_DIR%\assets %BUNDLE_DIR%\assets
- copy project.dict  %BUNDLE_DIR%\assets
- %PYTHON% %PROJECT_TOP_DIR%\tools\config_tool.py -DBUNDLE_DIR=%BUNDLE_DIR% app.bat.in %PROJECT_INSTALL_PREFIX%\bin\%APP%.bat
+ set INSTALL_BUNDLE_DIR=%PROJECT_INSTALL_PREFIX%\lib\%APP%.bundle
+ echo "install bundle dir %INSTALL_BUNDLE_DIR%"
+ if NOT exist %INSTALL_BUNDLE_DIR% (
+   echo "INSTALL BUNDLE DIR  %INSTALL_BUNDLE_DIR% does not exist"
+   mkdir %INSTALL_BUNDLE_DIR%
+ )
+
+ cmake  --install %PROJECT_BUILD_DIR% --prefix=%INSTALL_BUNDLE_DIR% --config=%PROJECT_BUILD_CONFIG%
+ if NOT exist %INSTALL_BUNDLE_DIR%\assets (
+   mkdir %INSTALL_BUNDLE_DIR%\assets
+ )
+ xcopy /e /i %PROJECT_TOP_DIR%\assets %INSTALL_BUNDLE_DIR%\assets
+ copy project.dict  %INSTALL_BUNDLE_DIR%\assets
+ %PYTHON% %MPS_BUILDTOOLS%\config_tool.py -DBUNDLE_DIR=%INSTALL_BUNDLE_DIR% app.bat.in %PROJECT_INSTALL_PREFIX%\bin\%APP%.bat
 )
 
 echo "Done"
