@@ -4,7 +4,8 @@ rem Following set by configure script
 
 rem Do I need quotes?
 
-
+set PYTHON={{ PYTHON }}
+set MPS_BUILDTOOLS={{ MPS_BUILDTOOLS }}
 
 set PROJECT_TOP_DIR={{ PROJECT_TOP_DIR }}
 set PROJECT_BUILD_DIR={{ PROJECT_BUILD_DIR }}
